@@ -99,7 +99,7 @@ class GeneticAlg():
             mutated.append(new_square)
         return mutated
 
-    def fix_intersections(self, individuals):
+    def __fix_intersections(self, individuals):
         def handle_left_bottom(outer, inner, eps=1e-6):
             bl_in = inner.bottom_left()
             tr_in = inner.top_right()
@@ -213,7 +213,7 @@ class GeneticAlg():
 
             population_arr.append(squares)
 
-        return Population(self.fix_intersections(population_arr))
+        return Population(self.__fix_intersections(population_arr))
 
     def __evolve_population(self, population):
 
@@ -234,7 +234,7 @@ class GeneticAlg():
                 new_gen.append(ch)
                 if len(new_gen) >= self.__population_size:
                     break
-        return Population(self.fix_intersections(new_gen))
+        return Population(self.__fix_intersections(new_gen))
 
     def __find_bounds(self):
         left = min(p.x for p in self.__points)
