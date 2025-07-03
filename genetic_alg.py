@@ -37,13 +37,11 @@ class Population:
     def __init__(self, individuals):
         self.individuals = individuals
 
-    def select_individual(self):
-        fits = [ind.fitness() for ind in self.individuals]
-        total = sum(fits)
-        if total == 0:
-            return random.choice(self.individuals)
-        probs = [f / total for f in fits]
-        return choices(self.individuals, weights=probs, k=1)[0]
+    def select_individual(self, type):
+        if type == 1:
+            return self.__roulette_selection()
+        if type == 2:
+            return self.__tournament_selection()
 
     def fix_intersections(self):
         def handle_left_bottom(outer, inner, eps=1e-6):
@@ -115,6 +113,18 @@ class Population:
                     else:
                         ind.squares[j] = tmp2
 
+    def __roulette_selection(self):
+        fits = [ind.fitness() for ind in self.individuals]
+        total = sum(fits)
+        if total == 0:
+            return random.choice(self.individuals)
+        probs = [f / total for f in fits]
+        return choices(self.individuals, weights=probs, k=1)[0]
+
+    def __tournament_selection(self, population, k=3):
+        tournament = [random.choice(self.individuals) for _ in range(k)]
+        return max(tournament, key=lambda ind: ind.fitness())
+
 
 class Solution():
     def __init__(self, squares_arr):
@@ -134,10 +144,11 @@ class Solution():
         return score
 
 class GeneticAlg():
-    def __init__(self, population_size, squares_num, points, elite_fraction, crossover_prob, mutation_prob):
+    def __init__(self, population_size, squares_num, points, selection_type, elite_fraction, crossover_prob, mutation_prob):
         self.__population_size = population_size
         self.__squares_num = squares_num
         self.__points = points
+        self.__selection_type = selection_type
         self.__elite_fraction = elite_fraction
         self.__crossover_prob = crossover_prob
         self.__mutation_prob = mutation_prob
@@ -161,11 +172,6 @@ class GeneticAlg():
         max_fit = max(fitnesses)
         return Population(sorted_individuals), mean_fit, max_fit
 
-    def do_until_the_end(self, final_index):
-        while len(self.__populations) < final_index:
-            self.__evolve_population(self.__populations[-1])
-        return self.get_solution(final_index)
-
     def crossover(self, parent1, parent2):
         new_parent1 = Solution([])
         new_parent2 = Solution([])
@@ -180,7 +186,7 @@ class GeneticAlg():
     def mutate(self, individual):
         mutated = []
         for sq in individual.squares:
-            sigma = sq.size * 0.1  # 10% от размера квадрата
+            sigma = sq.size * 0.3  # 30% от размера квадрата
             new_x = gauss(sq.x, sigma)
             new_y = gauss(sq.y, sigma)
             new_size = max(0.001, gauss(sq.size, sigma))
