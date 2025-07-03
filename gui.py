@@ -79,24 +79,49 @@ class MainApp(Tk):
         self.canvas_evo.draw()
 
     def initialize_algorithm(self):
-        if len(self.points) == 0:
-            messagebox.showerror(title="Ошибка", message="Необходдимо добавить точки")
-        else:
-            if self.next_step_button['state'] == 'disabled':
-                self.next_step_button["state"] = 'normal'
-                self.prev_step_button["state"] = 'normal'
-                self.finish_button["state"] = 'normal'
-                self.combobox['state'] = 'normal'
-                self.combobox.insert(0, 'Лучшее решение')
-            method = 2 if self.ga_combobox.get() == "Турнирный отбор" else 1
-            self.genetic_alg = GeneticAlg(int(self.population_size.get()), int(self.m.get()), self.points, method,
-                                          int(self.elite_fraction.get()) / 100, int(self.crossover_prob.get()) / 100, int(self.mutation_prob.get()) / 100)
-            self.current_generation = 1
-            self.max_fit = []
-            self.mean_fit = []
-            self.update_plot()
-            self.current_generation_size = int(self.generation_size.get())
-            self.current_generation_label["text"] = f"Поколение {self.current_generation}/{self.current_generation_size}"
+        try:
+            m_val = int(self.m.get())
+            if m_val <= 0:
+                raise ValueError("Количество квадратов должно быть положительным целым числом")
+
+            pop_size = int(self.population_size.get())
+            if pop_size <= 0:
+                raise ValueError("Размер популяции должен быть положительным целым числом")
+
+            gen_size = int(self.generation_size.get())
+            if gen_size <= 0:
+                raise ValueError("Число поколений должно быть положительным целым числом")
+
+            crossover_prob = float(self.crossover_prob.get())
+            mutation_prob = float(self.mutation_prob.get())
+            elite_fraction = float(self.elite_fraction.get())
+            if any(map(lambda x: x < 0 or x > 100,[crossover_prob, mutation_prob, elite_fraction])):
+                raise ValueError("Вероятность должна быть от 0 до 100")
+
+            if len(self.points) == 0:
+                raise ValueError("Необходимо добавить точки")
+
+        except ValueError as e:
+            messagebox.showerror(title="Ошибка ввода параметров", message=str(e))
+            return
+
+        if self.next_step_button['state'] == 'disabled':
+            self.next_step_button["state"] = 'normal'
+            self.prev_step_button["state"] = 'normal'
+            self.finish_button["state"] = 'normal'
+            self.combobox['state'] = 'normal'
+            self.combobox.insert(0, 'Лучшее решение')
+
+        method = 2 if self.ga_combobox.get() == "Турнирный отбор" else 1
+        self.genetic_alg = GeneticAlg(pop_size, m_val, self.points, method,
+                                      elite_fraction / 100, crossover_prob / 100, mutation_prob / 100)
+
+        self.current_generation = 1
+        self.max_fit = []
+        self.mean_fit = []
+        self.current_generation_size = gen_size
+        self.current_generation_label["text"] = f"Поколение {self.current_generation}/{self.current_generation_size}"
+        self.update_plot()
 
     def enable_controls(self):
         self.finish_button.config(state='normal')
