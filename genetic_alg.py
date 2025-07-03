@@ -121,8 +121,8 @@ class Population:
         probs = [f / total for f in fits]
         return choices(self.individuals, weights=probs, k=1)[0]
 
-    def __tournament_selection(self, k=3):
-        tournament = [choice(self.individuals) for _ in range(k)]
+    def __tournament_selection(self, k=8):
+        tournament = [choice(self.individuals) for _ in range(len(self.individuals)//10)]
         return max(tournament, key=lambda ind: ind.fitness())
 
 
@@ -262,6 +262,13 @@ class GeneticAlg():
         self.__populations.append(new_population)
 
     def __find_bounds(self):
+         if len(self.__points) == 1:
+            point = self.__points[0]
+            left = point.x - 10
+            right = point.x + 10
+            down = point.y - 10
+            up = point.y + 10
+            return left, right, down, up
         left = min(p.x for p in self.__points)
         right = max(p.x for p in self.__points)
         down = min(p.y for p in self.__points)
