@@ -1,4 +1,4 @@
-from random import random, uniform, choices, randint, gauss
+from random import random, uniform, choices, randint, gauss, choice
 
 def generate_point(left, down, right, up):
     x = uniform(left,right)
@@ -117,12 +117,12 @@ class Population:
         fits = [ind.fitness() for ind in self.individuals]
         total = sum(fits)
         if total == 0:
-            return random.choice(self.individuals)
+            return choice(self.individuals)
         probs = [f / total for f in fits]
         return choices(self.individuals, weights=probs, k=1)[0]
 
-    def __tournament_selection(self, population, k=3):
-        tournament = [random.choice(self.individuals) for _ in range(k)]
+    def __tournament_selection(self, k=3):
+        tournament = [choice(self.individuals) for _ in range(k)]
         return max(tournament, key=lambda ind: ind.fitness())
 
 
@@ -245,8 +245,8 @@ class GeneticAlg():
         new_gen = sorted_inds[:elite_count]
 
         while len(new_gen) < self.__population_size:
-            p1 = population.select_individual()
-            p2 = population.select_individual()
+            p1 = population.select_individual(self.__selection_type)
+            p2 = population.select_individual(self.__selection_type)
             if random() < self.__crossover_prob:
                 children = self.crossover(p1, p2)
             else:
