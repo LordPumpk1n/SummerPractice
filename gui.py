@@ -235,21 +235,33 @@ class MainApp(Tk):
 
 
     def update_plot(self):
-        all_x = []
-        all_y = []
+        if self.scatter:
+            self.scatter.remove()
+            self.scatter = None
+
+        for patch in self.squares_patches:
+            patch.remove()
+        self.squares_patches.clear()
 
         if self.points:
             x_coords = [p.x for p in self.points]
             y_coords = [p.y for p in self.points]
-            all_x.extend(x_coords)
-            all_y.extend(y_coords)
-            self.scatter.set_offsets(list(zip(x_coords, y_coords)))
-        else:
-            self.scatter.set_offsets(np.empty((0,2)))
+            self.scatter = self.ax.scatter(x_coords, y_coords, c='blue')
 
-        for patch in self.squares_patches:
-            patch.remove()
-        self.squares_patches = []
+            min_x = min(p.x for p in self.points)
+            max_x = max(p.x for p in self.points)
+            min_y = min(p.y for p in self.points)
+            max_y = max(p.y for p in self.points)
+
+            x_padding = max(10, (max_x - min_x) * 0.1)
+            y_padding = max(10, (max_y - min_y) * 0.1)
+
+            self.ax.set_xlim(min_x - x_padding, max_x + x_padding)
+            self.ax.set_ylim(min_y - y_padding, max_y + y_padding)
+        else:
+            self.scatter = self.ax.scatter([], [], c='blue')
+            self.ax.set_xlim(-10, 10)
+            self.ax.set_ylim(-10, 10)
 
         if self.genetic_alg is not None:
             population, mean_fit, max_fit = self.genetic_alg.get_solution(self.current_generation - 1)
@@ -262,11 +274,6 @@ class MainApp(Tk):
                 self.ax.add_patch(rect)
                 self.squares_patches.append(rect)
 
-                all_x.append(square.x)
-                all_x.append(square.x + square.size)
-                all_y.append(square.y)
-                all_y.append(square.y + square.size)
-
             generations = list(range(1, len(self.max_fit) + 1))
             if self.genetic_alg is not None:
                 self.mean_line.set_data(generations, self.mean_fit)
@@ -277,26 +284,6 @@ class MainApp(Tk):
         else:
             self.mean_line.set_data([], [])
             self.max_line.set_data([], [])
-
-            self.ax_evo.set_xlim(0, 1)
-            self.ax_evo.set_ylim(0, 1)
-            self.canvas_evo.draw_idle()
-
-        if all_x:
-            min_x = min(x for x in all_x)
-            max_x = max(x for x in all_x)
-            min_y = min(y for y in all_y)
-            max_y = max(y for y in all_y)
-
-            x_padding = max(10, (max_x - min_x) * 0.1)
-            y_padding = max(10, (max_y - min_y) * 0.1)
-
-            self.ax.set_xlim(min_x - x_padding, max_x + x_padding)
-            self.ax.set_ylim(min_y - y_padding, max_y + y_padding)
-        else:
-            self.ax.set_xlim(-10, 10)
-            self.ax.set_ylim(-10, 10)
-
         self.canvas.draw_idle()
         self.canvas_evo.draw_idle()
 
