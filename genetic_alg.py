@@ -263,24 +263,24 @@ class GeneticAlg():
 
     def __find_bounds(self):
          if len(self.__points) == 1:
-            point = self.__points[0]
-            left = point.x - 10
-            right = point.x + 10
-            down = point.y - 10
-            up = point.y + 10
-            return left, right, down, up
-        left = min(p.x for p in self.__points)
-        right = max(p.x for p in self.__points)
-        down = min(p.y for p in self.__points)
-        up = max(p.y for p in self.__points)
+             point = self.__points[0]
+             left = point.x - 10
+             right = point.x + 10
+             down = point.y - 10
+             up = point.y + 10
+             return left, right, down, up
+         left = min(p.x for p in self.__points)
+         right = max(p.x for p in self.__points)
+         down = min(p.y for p in self.__points)
+         up = max(p.y for p in self.__points)
 
-        x_len = right - left
-        y_len = up - down
+         x_len = right - left
+         y_len = up - down
 
-        add_x = x_len * 0.05
-        add_y = y_len * 0.05
-        left -= add_x
-        right += add_x
-        down -= add_y
-        up += add_y
-        return left, right, down, up
+         add_x = x_len * 0.05
+         add_y = y_len * 0.05
+         left -= add_x
+         right += add_x
+         down -= add_y
+         up += add_y
+         return left, right, down, up
